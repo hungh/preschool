@@ -54,7 +54,7 @@ SECTION C - MODEL DATA
 
     - ADMIN
         + LOGIN
-        + PASSWORD
+        + HASH_STRING
 
     - GUEST
         + NAME: unique
@@ -62,14 +62,14 @@ SECTION C - MODEL DATA
         + MATH_ENTRIES: ordered (index) array of [ MATH_ENTRY.ID, ANSWER ]
 
     - SPELL_ENTRY
-        + ID: unique
+        + SID: unique
         + IMAGE_NAME: name of image to show
         + ARRAY_LETTERS: an array of possible letters
         + ANSWER: correct answer
         + LEVEL: difficulty level
 
     - MATH_ENTRY
-        + ID: unique
+        + MID: unique
         + EXPRESSION
         + LEVEL
 

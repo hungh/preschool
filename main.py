@@ -1,7 +1,11 @@
 from global_const import KEY_LOGIN, KEY_PASSWORD, DEBUG_MODE, WRONG_CREDENTIAL
-from flask import Flask, render_template, request
+from db_config import DB_HOST, DB_PORT, DB_NAME
+from flask import Flask, render_template, request, g
+from mongoengine import connect
 
 app = Flask(__name__)
+app.config.from_pyfile('db_config.py')
+g.db = connect(DB_NAME, host=DB_HOST, port=DB_PORT)
 
 
 @app.route('/')
