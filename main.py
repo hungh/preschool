@@ -1,6 +1,8 @@
-from global_const import KEY_LOGIN, KEY_PASSWORD, DEBUG_MODE
+from global_const import KEY_LOGIN, KEY_PASSWORD, DEBUG_MODE, WRONG_CREDENTIAL
 from flask import Flask, render_template, request
+
 app = Flask(__name__)
+
 
 @app.route('/')
 def index_page():
@@ -14,7 +16,7 @@ def login_access():
     if login == 'hung' and password == 'password':
         return render_template('work.html', msg=login)
     else:
-        return render_template("index.html", msg='Something is wrong with your login/password')
+        return render_template("index.html", msg=WRONG_CREDENTIAL)
 
 
 if __name__ == "__main__":

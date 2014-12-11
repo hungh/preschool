@@ -1,0 +1,113 @@
+********************************************
+*   PRESCHOOL ACTIVITY WEB GAME (age 3-5)  *
+********************************************
+
+<<SPELLING GAMES WITH MATCHING IMAGES/MATH>>
+
+SECTION A - IDEAS
+-----------------
+
+* users  (login options or guest session)
+    - login option is only for admin use
+    - guest session is for every user with a name
+
+* admin ( to generate game content and load it into database)
+    - a content includes a question, image, answer and difficulty level
+    - ability to modify/delete an existing content
+    - ability to add a new content
+
+
+* remember where the user left off
+    - record the question id and the user's answer
+    - when the user logs back in, the new content will be rendered
+    - show the number of correct/incorrect answers
+    - user can go back to any previous question to redo his/her work
+
+
+SECTION  B - GAMES RULES
+------------------------
+
+*  SPELLING
+    - provide an image, the name of it and difficulty level to build questions pool
+    - difficulty level of a question is from 1 to 9, where 9 is the hardest
+    - screen will show the image and list of possible letters to form the corresponding name
+    - players shall pick correct letter to form a correct word which matches the image
+    - if a question of difficult level alpha is answered correctly, the next question
+      will have a difficult level of > alpha
+    - if the questions pool is out of 'num' level question, look for 'num' - 1 un-answered questions
+
+
+* MATH
+
+ (addition, subtraction only with number range from 0 - 10, apply only 2 numbers)
+
+    - provide a number --> generate an image (sticks) to represent that number
+    - provide a list of answers which have exactly one correct one
+    - provide a difficulty level of the question
+
+
+
+SECTION C - MODEL DATA
+----------------------
+
+* OBJECTS
+
+    - ADMIN
+        + LOGIN
+        + PASSWORD
+
+    - GUEST
+        + NAME: unique
+        + SPELL_ENTRIES: ordered (index) array of [ SPELL_ENTRY.ID, ANSWER ]
+        + MATH_ENTRIES: ordered (index) array of [ MATH_ENTRY.ID, ANSWER ]
+
+    - SPELL_ENTRY
+        + ID: unique
+        + IMAGE_NAME: name of image to show
+        + ARRAY_LETTERS: an array of possible letters
+        + ANSWER: correct answer
+        + LEVEL: difficulty level
+
+    - MATH_ENTRY
+        + ID: unique
+        + EXPRESSION
+        + LEVEL
+
+
+* ADVANCED (ADMIN)
+
+    - HOW TO CHECK AN EXPRESSION'S CORRECTNESS?
+        + EXPR '(G1) + (G2)', MAKE SURE G1 AND G2 ARE NUMERIC
+
+
+
+SECTION D - DISTRIBUTED TASKS (OPTIONAL)
+------------------------------------------
+
+* Once a guest submit an answer, [GUEST_NAME, QUESTION_ID, GUEST_ANSWER] is sent to  Clerey's worker(s)
+  this information will be stored in GUEST.SPELL_ENTRIES or MATH_ENTRIES
+
+* Doing this helps scale a large number of request to multiple servers/databases
+
+
+
+SECTION E - CONTROLLERS
+-----------------------
+
+* ADMIN
+    - LOGIN
+    - ADD/DELETE/UPDATE ENTRIES
+    - SHOW GUEST NAMES
+
+
+* GUEST
+    - SUBMIT AN ENTRY
+    - LOAD AN ENTRY, CALL-BACK FROM ENTRY SUBMIT
+
+    
+
+
+
+
+
+

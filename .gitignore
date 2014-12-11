@@ -54,4 +54,4 @@ docs/_build/
 target/
 
 # IDEA IDE
-idea/
+.idea/
