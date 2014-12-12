@@ -45,6 +45,7 @@ def get_user(login_name):
     return User.objects(login=login_name).first()
 
 
+# Spelling entry section
 @except_dup_key
 def create_spell_entry(my_image_name, my_array_letters, my_answer, my_level):
     return SpellEntry(image_name=my_image_name, array_letters=my_array_letters,
@@ -65,6 +66,31 @@ def get_spell_entry(my_image_name, guest_name):
     same_owner_answer = []
     spell_entry = SpellEntry.objects(image_name=my_image_name).first()
     for one_answer in spell_entry.user_answers:
+        if hasattr(one_answer, 'owner') and one_answer.owner.login == guest_name:
+            same_owner_answer.append(one_answer)
+    return same_owner_answer
+
+
+# Math Section
+@except_dup_key
+def create_math_entry(my_expression, my_level):
+    return MathEntry(expression=my_expression, level=my_level, user_answers=[]).save()
+
+
+@except_dup_key
+def add_math_entry(my_expression, guest_name, guest_answer):
+    math_entry = MathEntry.objects(expression=my_expression).first()
+    guest = get_guest(guest_name)
+    if math_entry:
+        math_answer = MathAnswer(owner=guest, answer=guest_answer).save()
+        math_entry.user_answers.append(math_answer)
+        math_entry.save()
+
+
+def get_math_entry(my_expression, guest_name):
+    same_owner_answer = []
+    math_entry = MathEntry.objects(expression=my_expression).first()
+    for one_answer in math_entry.user_answers:
         if hasattr(one_answer, 'owner') and one_answer.owner.login == guest_name:
             same_owner_answer.append(one_answer)
     return same_owner_answer

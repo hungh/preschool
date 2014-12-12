@@ -53,6 +53,6 @@ class SpellEntry(Document):
 class MathEntry(Document):
     expression = StringField(required=True, unique=True)
     level = IntField(min_value=1, max_value=9)
-    answers = ListField(ReferenceField(MathAnswer))
+    user_answers = ListField(ReferenceField(MathAnswer))
 
 

@@ -1,7 +1,8 @@
 from global_const import KEY_LOGIN, KEY_PASSWORD, DEBUG_MODE, WRONG_CREDENTIAL
 from db_config import DB_HOST, DB_PORT, DB_NAME
 from flask import Flask, render_template, request
-from controller import add_guest, add_user, create_spell_entry, add_spell_entry, get_spell_entry
+from controller import add_guest, add_user, create_spell_entry, add_spell_entry
+from controller import  get_spell_entry, create_math_entry, add_math_entry, get_math_entry
 from mongoengine import connect
 
 app = Flask(__name__)
@@ -34,6 +35,14 @@ def test_db():
     add_spell_entry(img_name, guest_name, 'apple2')
     for spell_entry in get_spell_entry(img_name, guest_name):
         print('Entry:' + spell_entry.answer)
+
+    expression1 =  '2 + 3'
+    create_math_entry(expression1, 1)
+    add_math_entry(expression1, guest_name, '5')
+
+    for math_entry in get_math_entry(expression1, guest_name):
+        print('Entry:' + math_entry.answer)
+
     return 'OK'
 
 
