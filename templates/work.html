@@ -11,6 +11,7 @@
   <meta http-equiv="pragma" content="no-cache" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Guest work area</title>
+  <script src="{{url_for('static', filename='js/util.js')}}"></script>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
  </head>
 
@@ -20,10 +21,21 @@
   </div>
   <br>
 
-  <div class="jumbotron modal-body" style="width: 200px;">
-      <img src="{{url_for('static', filename=image_file)}}">
-      <p>{{arr_letter}}</p>
+  <div class="" style="width: 200px;">
+      <img src="{{url_for('static', filename=image_file)}}"><br><br>
+      {% for each_letter in arr_letter %}
+        <input type="text"  class="answerTexts" style="width:40px;" name="{{each_letter.upper()}}" value="" id="t_{{each_letter}}">&nbsp;&nbsp;
+      {% endfor %}
+
+      <br><br>
+
+      {% for each_letter in arr_letter %}
+        <input type="button" class="btn btn-success" name="{{each_letter}}" value="{{each_letter.upper()}}" id="{{each_letter}}" onclick="match_up(this);">&nbsp;&nbsp;
+      {% endfor %}
+
   </div>
+ <br><input type="button"  class="btn btn-danger" name="clear" value="CLEAR" onclick="clear_all()">
+ <input type="button"  class="btn btn-info" style="width:80px;" name="next" value="NEXT" onclick="()">
 
 </body>
 </html>

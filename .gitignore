@@ -55,3 +55,7 @@ target/
 
 # IDEA IDE
 .idea/
+
+
+# static image
+static/img/*.*
