@@ -1,13 +1,20 @@
-from global_const import KEY_LOGIN, KEY_PASSWORD, KEY_NAME, DEBUG_MODE, WRONG_CREDENTIAL
-from db_config import DB_HOST, DB_PORT, DB_NAME
-from flask import Flask, render_template, request
-from controller import add_guest, get_guest, add_user, get_user, create_spell_entry, add_spell_entry
-from controller import get_spell_entry, create_math_entry, add_math_entry, get_math_entry
+from global_const import KEY_LOGIN, KEY_PASSWORD, KEY_NAME, DEBUG_MODE,\
+    WRONG_CREDENTIAL, KEY_ARR_LETTER, KEY_ANSWER, KEY_LEVEL, SESSION_GUEST
+from config import DB_HOST, DB_PORT, DB_NAME
+from utils import allowed_file
+from flask import Flask, render_template, request, session
+from werkzeug import secure_filename
+from controller import add_guest, get_guest, add_user, get_user, create_spell_entry
+from models import SpellEntry
 from mongoengine import connect
 import bcrypt
+import os
+
+
 
 app = Flask(__name__)
-app.config.from_pyfile('db_config.py')
+app.config.from_pyfile('config.py')
+app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RTGFHb11'
 db = connect(DB_NAME, host=DB_HOST, port=DB_PORT)
 
 
@@ -25,10 +32,12 @@ def register():
 def register_enter():
     name = request.form[KEY_NAME]
     existing_guest = get_guest(name)
-    if existing_guest:
-        return render_template("register.html", msg="Name taken, Use another name")
-    add_guest(name)
-    return render_template('work.html', msg=name)
+    if not existing_guest:
+        add_guest(name)
+    # save guest name into session
+    session[SESSION_GUEST] = name
+    first_spell = SpellEntry.objects().first()
+    return render_template('work.html', msg=name, image_file='img/%s' % first_spell.image_name, arr_letter=first_spell.array_letters)
 
 
 @app.route("/updatepass",  methods=['POST'])
@@ -53,31 +62,29 @@ def login_access():
         return render_template("index.html", msg=WRONG_CREDENTIAL)
 
     if bcrypt.checkpw(password, user.hash_string):
-        return render_template('work.html', msg=login)
+        return render_template('spell_admin.html')
 
     return render_template("index.html", msg=WRONG_CREDENTIAL)
 
 
+@app.route("/add_spell", methods=["POST"])
+def add_spell():
+    f = request.files['image_name']
+    if f and allowed_file(f.filename):
+        f.save(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(f.filename)))
+        arr_letter = request.form[KEY_ARR_LETTER]
+        answer = request.form[KEY_ANSWER]
+        level = request.form[KEY_LEVEL]
+
+        if create_spell_entry(f.filename, arr_letter.split(','), answer, level):
+            return render_template('spell_admin.html', msg='Successfully saved')
+    return render_template('spell_admin.html', err='Failed to add entry')
+
+
 @app.route("/test")
 def test_db():
-    img_name = 'apple.png'
-    guest_name = 'emma2'
-    add_user('admin3', 'password')
-    add_guest(guest_name)
-    create_spell_entry(img_name, ['a', 's', 'p', 'p', 'k', 'l', 'e'], 'apple', 1)
-    add_spell_entry(img_name, guest_name, 'apple2')
-    for spell_entry in get_spell_entry(img_name, guest_name):
-        print('Entry:' + spell_entry.answer)
-
-    expression1 = '2 + 3'
-    create_math_entry(expression1, 1)
-    add_math_entry(expression1, guest_name, '5')
-
-    for math_entry in get_math_entry(expression1, guest_name):
-        print('Entry:' + math_entry.answer)
-
     return 'OK'
 
 
 if __name__ == "__main__":
-    app.run(debug=DEBUG_MODE)
+    app.run('0.0.0.0', debug=DEBUG_MODE)
