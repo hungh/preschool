@@ -1,6 +1,7 @@
 # KEYS
 KEY_LOGIN = 'login'
 KEY_PASSWORD = 'password'
+KEY_NAME = 'name'
 
 
 # APPLICATION CONFIG
