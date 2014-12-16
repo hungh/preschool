@@ -8,51 +8,18 @@ class User(Document):
 
 class Guest(Document):
     login = StringField(max_length=50, required=True, unique=True)
-
-
-class SpellAnswer(Document):
-    owner = ReferenceField(Guest, reverse_delete_rule=CASCADE)
-    answer = StringField()
-    meta = {
-        'indexes': [
-            {
-                'fields': ['-owner', '-answer'],
-                'unique': True
-            }
-        ]
-
-    }
-
-    def __str__(self):
-        return 'Owner: %s - Answer: %s' % self.owner, self.answer
-
-
-class MathAnswer(Document):
-    owner = ReferenceField(Guest, reverse_delete_rule=CASCADE)
-    answer = StringField()
-
-    meta = {
-        'indexes': [
-            {
-                'fields': ['-owner', '-answer'],
-                'unique': True
-            }
-        ]
-
-    }
+    spell_answers = DictField()  # image_name, answer
+    math_answers = DictField()   # expression, answer
 
 
 class SpellEntry(Document):
-    image_name = StringField(unique=True)
-    array_letters = ListField(StringField(max_length=1, min_length=1))
+    image_name = StringField(required=True, unique=True)
+    array_letters = ListField(StringField(max_length=1, min_length=1), required=True)
     answer = StringField(required=True)
     level = IntField(min_value=1, max_value=9)
-    user_answers = ListField(ReferenceField(SpellAnswer))
 
 
 class MathEntry(Document):
     expression = StringField(required=True, unique=True)
+    answer = StringField(required=True)
     level = IntField(min_value=1, max_value=9)
-    user_answers = ListField(ReferenceField(MathAnswer))
-
-

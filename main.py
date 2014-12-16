@@ -4,7 +4,8 @@ from config import DB_HOST, DB_PORT, DB_NAME
 from utils import allowed_file
 from flask import Flask, render_template, request, session
 from werkzeug import secure_filename
-from controller import add_guest, get_guest, add_user, get_user, create_spell_entry, add_spell_entry, get_spell_entry
+from controller import add_guest, get_guest, add_user, get_user, \
+    create_spell_entry, add_spell_answer_to_guest, get_next_spell_entry
 from models import SpellEntry
 from mongoengine import connect
 import bcrypt
@@ -44,15 +45,19 @@ def register_enter():
 @app.route("/guest_answer", methods=['POST'])
 def guest_answer():
     guest_ans = request.form[KEY_GUEST_ANSWER]
-    image_name = request.form[KEY_IMAGE_NAME]
+    image_name = request.form[KEY_IMAGE_NAME].split('/')[1]  # LINUX
+
     if guest_ans:
-        add_spell_entry(image_name, guest_ans, session[SESSION_GUEST])
-        for one_spell in SpellEntry.objects():
-            if 'img/%s' % one_spell.image_name != image_name:
-                return render_template('work.html', msg=session[SESSION_GUEST],
-                                       image_file='img/%s' % one_spell.image_name, arr_letter=one_spell.array_letters,
-                                       arr_answer=list(one_spell.answer))
-    return "Error at server"
+        add_spell_answer_to_guest(session[SESSION_GUEST], image_name, guest_ans)
+
+    next_spell_entry = get_next_spell_entry(session[SESSION_GUEST])
+    if next_spell_entry:
+        return render_template('work.html', msg=session[SESSION_GUEST],
+                               image_file='img/%s' % next_spell_entry.image_name,
+                               arr_letter=next_spell_entry.array_letters,
+                               arr_answer=list(next_spell_entry.answer))
+
+    return "No more question left. You have finished the test."
 
 
 @app.route("/updatepass",  methods=['POST'])

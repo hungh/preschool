@@ -1,4 +1,4 @@
-from models import User, Guest, SpellEntry, MathEntry, SpellAnswer, MathAnswer
+from models import User, Guest, SpellEntry, MathEntry
 from mongoengine import errors
 import bcrypt
 
@@ -23,7 +23,7 @@ def add_guest(login_name):
     :param login_name: string
     :return: Document
     """
-    return Guest(login=login_name).save()
+    return Guest(login=login_name, spell_answers=dict(), math_answers=dict()).save()
 
 
 def get_guest(login_name):
@@ -59,41 +59,19 @@ def create_spell_entry(my_image_name, my_array_letters, my_answer, my_level):
     """
     :param my_image_name: string the name of image
     :param my_array_letters: array
-    :param my_answer: string
     :param my_level: integer
     :return: Document
     """
     return SpellEntry(image_name=my_image_name, array_letters=my_array_letters,
-                      level=my_level, answer=my_answer, user_answers=[]).save()
+                      level=my_level, answer=my_answer).save()
 
 
-@except_dup_key
-def add_spell_entry(my_image_name, guest_name, guest_answer):
-    """
-    :param my_image_name: string file name of an image
-    :param guest_name: string guest
-    :param guest_answer: string
-    """
-    spell_entry = SpellEntry.objects(image_name=my_image_name).first()
-    guest = get_guest(guest_name)
-    if spell_entry:
-        spell_answer = SpellAnswer(owner=guest, answer=guest_answer).save()
-        spell_entry.user_answers.append(spell_answer)
-        spell_entry.save()
-
-
-def get_spell_entry(my_image_name, guest_name):
+def get_spell_entry(my_image_name):
     """
     :param my_image_name: string
-    :param guest_name: string
     :return: array of Document
     """
-    same_owner_answer = []
-    spell_entry = SpellEntry.objects(image_name=my_image_name).first()
-    for one_answer in spell_entry.user_answers:
-        if hasattr(one_answer, 'owner') and one_answer.owner.login == guest_name:
-            same_owner_answer.append(one_answer)
-    return same_owner_answer
+    return SpellEntry.objects(image_name=my_image_name).first()
 
 
 # Math Section
@@ -104,36 +82,42 @@ def create_math_entry(my_expression, my_level):
     :param my_level: integer
     :return: Document
     """
-    return MathEntry(expression=my_expression, level=my_level, user_answers=[]).save()
+    return MathEntry(expression=my_expression, level=my_level).save()
 
 
-@except_dup_key
-def add_math_entry(my_expression, guest_name, guest_answer):
+def get_math_entry(my_expression):
     """
     :param my_expression: string
-    :param guest_name:  string
-    :param guest_answer:  string
-    """
-    math_entry = MathEntry.objects(expression=my_expression).first()
-    guest = get_guest(guest_name)
-    if math_entry:
-        math_answer = MathAnswer(owner=guest, answer=guest_answer).save()
-        math_entry.user_answers.append(math_answer)
-        math_entry.save()
-
-
-def get_math_entry(my_expression, guest_name):
-    """
-    :param my_expression: string
-    :param guest_name: string
     :return: array of Document
     """
-    same_owner_answer = []
-    math_entry = MathEntry.objects(expression=my_expression).first()
-    for one_answer in math_entry.user_answers:
-        if hasattr(one_answer, 'owner') and one_answer.owner.login == guest_name:
-            same_owner_answer.append(one_answer)
-    return same_owner_answer
+    return MathEntry.objects(expression=my_expression).first()
+
+
+def get_img_key(image_name):
+    return image_name.split('.')[0]
+
+
+def get_next_spell_entry(guest_name):
+    guest = Guest.objects(login=guest_name).first()
+    spell_answers = guest.spell_answers
+
+    for spell_entry in SpellEntry.objects():
+        try:
+            key_image = get_img_key(spell_entry.image_name)
+            spell_answers[key_image]
+        except KeyError:
+            return spell_entry
+
+    return None
+
+
+def add_spell_answer_to_guest(guest_name, image_name, answer):
+    guest = get_guest(guest_name)
+    key_image = get_img_key(image_name)
+    guest.spell_answers[key_image] = answer
+    guest.save()
+
+
 
 
 
