@@ -8,6 +8,9 @@ KEY_ARR_LETTER = 'arr_letter'
 KEY_ANSWER = 'answer'
 KEY_LEVEL = 'level'
 
+# add spell entry
+KEY_GUEST_ANSWER = 'guest_answer'
+KEY_IMAGE_NAME = 'image_name'
 
 # session
 SESSION_GUEST = 'guest'

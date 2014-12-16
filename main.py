@@ -1,10 +1,10 @@
 from global_const import KEY_LOGIN, KEY_PASSWORD, KEY_NAME, DEBUG_MODE,\
-    WRONG_CREDENTIAL, KEY_ARR_LETTER, KEY_ANSWER, KEY_LEVEL, SESSION_GUEST
+    WRONG_CREDENTIAL, KEY_ARR_LETTER, KEY_ANSWER, KEY_GUEST_ANSWER, KEY_LEVEL, KEY_IMAGE_NAME, SESSION_GUEST
 from config import DB_HOST, DB_PORT, DB_NAME
 from utils import allowed_file
 from flask import Flask, render_template, request, session
 from werkzeug import secure_filename
-from controller import add_guest, get_guest, add_user, get_user, create_spell_entry
+from controller import add_guest, get_guest, add_user, get_user, create_spell_entry, add_spell_entry, get_spell_entry
 from models import SpellEntry
 from mongoengine import connect
 import bcrypt
@@ -37,7 +37,22 @@ def register_enter():
     # save guest name into session
     session[SESSION_GUEST] = name
     first_spell = SpellEntry.objects().first()
-    return render_template('work.html', msg=name, image_file='img/%s' % first_spell.image_name, arr_letter=first_spell.array_letters)
+    return render_template('work.html', msg=name, image_file='img/%s' % first_spell.image_name,
+                           arr_letter=first_spell.array_letters, arr_answer=list(first_spell.answer))
+
+
+@app.route("/guest_answer", methods=['POST'])
+def guest_answer():
+    guest_ans = request.form[KEY_GUEST_ANSWER]
+    image_name = request.form[KEY_IMAGE_NAME]
+    if guest_ans:
+        add_spell_entry(image_name, guest_ans, session[SESSION_GUEST])
+        for one_spell in SpellEntry.objects():
+            if 'img/%s' % one_spell.image_name != image_name:
+                return render_template('work.html', msg=session[SESSION_GUEST],
+                                       image_file='img/%s' % one_spell.image_name, arr_letter=one_spell.array_letters,
+                                       arr_answer=list(one_spell.answer))
+    return "Error at server"
 
 
 @app.route("/updatepass",  methods=['POST'])

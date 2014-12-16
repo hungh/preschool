@@ -23,19 +23,23 @@
 
   <div class="" style="width: 200px;">
       <img src="{{url_for('static', filename=image_file)}}"><br><br>
-      {% for each_letter in arr_letter %}
-        <input type="text"  class="answerTexts" style="width:40px;" name="{{each_letter.upper()}}" value="" id="t_{{each_letter}}">&nbsp;&nbsp;
+      {% for each_letter in arr_answer %}
+        <input type="text"  class="answerTexts" style="width:40px;margin:3px;" name="{{each_letter.upper()}}" value="" id="t_{{each_letter}}">&nbsp;&nbsp;
       {% endfor %}
 
       <br><br>
 
       {% for each_letter in arr_letter %}
-        <input type="button" class="btn btn-success" name="{{each_letter}}" value="{{each_letter.upper()}}" id="{{each_letter}}" onclick="match_up(this);">&nbsp;&nbsp;
+        <input type="button" class="btn btn-success" style="margin:2px;" name="{{each_letter}}" value="{{each_letter.upper()}}" id="{{each_letter}}" onclick="match_up(this);">&nbsp;&nbsp;
       {% endfor %}
 
   </div>
- <br><input type="button"  class="btn btn-danger" name="clear" value="CLEAR" onclick="clear_all()">
- <input type="button"  class="btn btn-info" style="width:80px;" name="next" value="NEXT" onclick="()">
+ <form method="POST" action="/guest_answer" onsubmit="onQuestAnswer()">
+     <br><input type="button"  class="btn btn-danger"  value="CLEAR" onclick="clear_all()">
+     <input type="hidden" name="guest_answer" value="" id="guest_answer">
+     <input type="hidden" name="image_name" value="{{image_file}}" >
+     <input type="submit"  class="btn btn-info" style="width:80px;" value="NEXT">
+ </form>
 
 </body>
 </html>
