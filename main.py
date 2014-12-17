@@ -37,9 +37,11 @@ def register_enter():
         add_guest(name)
     # save guest name into session
     session[SESSION_GUEST] = name
-    first_spell = SpellEntry.objects().first()
-    return render_template('work.html', msg=name, image_file='img/%s' % first_spell.image_name,
-                           arr_letter=first_spell.array_letters, arr_answer=list(first_spell.answer))
+    first_spell = get_next_spell_entry(session[SESSION_GUEST])
+    if first_spell:
+        return render_template('work.html', msg=name, image_file='img/%s' % first_spell.image_name,
+                               arr_letter=first_spell.array_letters, arr_answer=list(first_spell.answer))
+    return render_template('review.html', answers=get_guest(session[SESSION_GUEST]).spell_answers)
 
 
 @app.route("/guest_answer", methods=['POST'])
@@ -57,7 +59,7 @@ def guest_answer():
                                arr_letter=next_spell_entry.array_letters,
                                arr_answer=list(next_spell_entry.answer))
 
-    return "No more question left. You have finished the test."
+    return render_template('review.html', answers=get_guest(session[SESSION_GUEST]).spell_answers)
 
 
 @app.route("/updatepass",  methods=['POST'])
