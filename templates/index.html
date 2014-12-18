@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block headline %}Welcome!{% endblock %}
-
+{% block menu_enable%}{% endblock %}
 {% block content %}
       <div class="jumbotron modal-body" style="width: 200px;" >
         <form method="POST" action="/login" role="form">
@@ -20,7 +20,7 @@
             <input type="password" class="form-control" name="password" id="password">
           </div>
           <button type="submit" class="btn btn-info" data-toggle="tooltip" data-placement="right" title="Login into application">Login</button><br>
-           <br> <a href="register">Register as guest</a>
+           <br> <a href="register">Enter test as guest</a>
        </form>
           <br><div class="bg-danger">{{msg}}</div>
       </div>

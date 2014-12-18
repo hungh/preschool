@@ -1,22 +1,44 @@
 from global_const import KEY_LOGIN, KEY_PASSWORD, KEY_NAME, DEBUG_MODE,\
-    WRONG_CREDENTIAL, KEY_ARR_LETTER, KEY_ANSWER, KEY_GUEST_ANSWER, KEY_LEVEL, KEY_IMAGE_NAME, SESSION_GUEST
+    WRONG_CREDENTIAL, KEY_ARR_LETTER, KEY_ANSWER, KEY_GUEST_ANSWER, \
+    KEY_LEVEL, KEY_IMAGE_NAME, GUEST_NAME
 from config import DB_HOST, DB_PORT, DB_NAME
 from utils import allowed_file
 from flask import Flask, render_template, request, session
 from werkzeug import secure_filename
 from controller import add_guest, get_guest, add_user, get_user, \
-    create_spell_entry, add_spell_answer_to_guest, get_next_spell_entry
-from models import SpellEntry
+    create_spell_entry, add_spell_answer_to_guest,\
+    get_next_spell_entry, clear_spell_answer
+
 from mongoengine import connect
 import bcrypt
 import os
-
 
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RTGFHb11'
 db = connect(DB_NAME, host=DB_HOST, port=DB_PORT)
+
+
+def app_filter(d_func):
+    def d_wrapper(*args, **kwargs):
+        try:
+            session[GUEST_NAME]
+        except KeyError:
+            return "You have logged out."
+        return d_func(*args, **kwargs)
+
+    return d_wrapper
+
+
+def render_next_question(my_session):
+    next_spell_entry = get_next_spell_entry(my_session[GUEST_NAME])
+    if next_spell_entry:
+        return render_template('work.html', msg=session[GUEST_NAME],
+                               image_file='img/%s' % next_spell_entry.image_name,
+                               arr_letter=next_spell_entry.array_letters,
+                               arr_answer=list(next_spell_entry.answer))
+    return None
 
 
 @app.route('/')
@@ -36,34 +58,38 @@ def register_enter():
     if not existing_guest:
         add_guest(name)
     # save guest name into session
-    session[SESSION_GUEST] = name
-    first_spell = get_next_spell_entry(session[SESSION_GUEST])
+    session[GUEST_NAME] = name
+    first_spell = get_next_spell_entry(session[GUEST_NAME])
     if first_spell:
         return render_template('work.html', msg=name, image_file='img/%s' % first_spell.image_name,
                                arr_letter=first_spell.array_letters, arr_answer=list(first_spell.answer))
-    return render_template('review.html', answers=get_guest(session[SESSION_GUEST]).spell_answers)
+    return render_template('review.html', answers=get_guest(session[GUEST_NAME]).spell_answers)
+
 
 
 @app.route("/guest_answer", methods=['POST'])
+@app_filter
 def guest_answer():
     guest_ans = request.form[KEY_GUEST_ANSWER]
     image_name = request.form[KEY_IMAGE_NAME].split('/')[1]  # LINUX
 
     if guest_ans:
-        add_spell_answer_to_guest(session[SESSION_GUEST], image_name, guest_ans)
+        add_spell_answer_to_guest(session[GUEST_NAME], image_name, guest_ans)
 
-    next_spell_entry = get_next_spell_entry(session[SESSION_GUEST])
-    if next_spell_entry:
-        return render_template('work.html', msg=session[SESSION_GUEST],
-                               image_file='img/%s' % next_spell_entry.image_name,
-                               arr_letter=next_spell_entry.array_letters,
-                               arr_answer=list(next_spell_entry.answer))
+    next_question_rendered = render_next_question(session)
+    if not next_question_rendered:
+        return render_template('review.html', answers=get_guest(session[GUEST_NAME]).spell_answers)
+    return next_question_rendered
 
-    return render_template('review.html', answers=get_guest(session[SESSION_GUEST]).spell_answers)
+
+@app.route("/retake_test", methods=['GET'])
+def retake_test():
+    clear_spell_answer(session[GUEST_NAME])
+    return render_next_question(session)
 
 
 @app.route("/updatepass",  methods=['POST'])
-def updatepass():
+def update_password():
     login = request.form[KEY_LOGIN]
     if login == 'root':
         root_user = get_user(login)
@@ -84,13 +110,27 @@ def login_access():
         return render_template("index.html", msg=WRONG_CREDENTIAL)
 
     if bcrypt.checkpw(password, user.hash_string):
+        # successful login
+        session[GUEST_NAME] = login
         return render_template('spell_admin.html')
 
     return render_template("index.html", msg=WRONG_CREDENTIAL)
 
 
+@app.route("/logout", methods=["POST", "GET"])
+def logout_access():
+    try:
+        del session[GUEST_NAME]
+    except KeyError:
+        pass
+    return render_template("index.html")
+
+
 @app.route("/add_spell", methods=["POST"])
 def add_spell():
+    if not session[GUEST_NAME] or session[GUEST_NAME] != 'root':
+        return "Access denied"
+
     f = request.files['image_name']
     if f and allowed_file(f.filename):
         f.save(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(f.filename)))

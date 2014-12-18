@@ -13,7 +13,7 @@ KEY_GUEST_ANSWER = 'guest_answer'
 KEY_IMAGE_NAME = 'image_name'
 
 # session
-SESSION_GUEST = 'guest'
+GUEST_NAME = 'user'
 
 # APPLICATION CONFIG
 DEBUG_MODE = True

@@ -118,6 +118,14 @@ def add_spell_answer_to_guest(guest_name, image_name, answer):
     guest.save()
 
 
+def clear_spell_answer(guest_name):
+    guest = get_guest(guest_name)
+    guest.spell_answers = dict()
+    guest.save()
+
+
+
+
 
 
 

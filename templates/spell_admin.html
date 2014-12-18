@@ -8,6 +8,11 @@
 
 {% block headline %}Add more entries{% endblock %}
 
+{% block menu_opt %}
+  <li><a href="#">Add spell entry</a></li>
+  <li><a href="#">Add math entry</a></li>
+{% endblock %}
+
 {% block content %}
   <div class="jumbotron modal-body" style="width: 320px;" >
     <form method="POST" action="/add_spell" role="form" enctype="multipart/form-data" accept="image/gif,image/jpeg, image/png">

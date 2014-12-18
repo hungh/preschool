@@ -12,11 +12,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}{% endblock %}</title>
     <script src="{{url_for('static', filename='js/util.js')}}"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
     {% endblock %}
 </head>
 
 <body style="padding:20px">
+    {% block menu_enable %}
+    <div class="btn-group">
+      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+        Menu <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu" role="menu">
+        {% block menu_opt %}{% endblock %}
+        <li class="divider"></li>
+        <li><a href="/logout">Logout</a></li>
+      </ul>
+
+    </div><br><br>
+    {% endblock %}
     <div>
         <strong style="color:green">{% block headline %}{% endblock %}</strong><br>
     </div>

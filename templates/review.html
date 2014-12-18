@@ -8,6 +8,10 @@
 
 {% block headline %}Here are your answers{% endblock %}
 
+{% block menu_opt %}
+  <li><a href="/retake_test">Retake the test</a></li>
+{% endblock %}
+
 {% block content %}
     <ul class="list-group">
     {% for image_name, one_answer in answers.items() %}
