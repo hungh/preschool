@@ -7,7 +7,7 @@ from flask import Flask, render_template, request, session
 from werkzeug import secure_filename
 from controller import add_guest, get_guest, add_user, get_user, \
     create_spell_entry, add_spell_answer_to_guest,\
-    get_next_spell_entry, clear_spell_answer
+    get_next_spell_entry, clear_spell_answer, get_spell_entry
 
 from mongoengine import connect
 import bcrypt
@@ -64,6 +64,30 @@ def register_enter():
         return render_template('work.html', msg=name, image_file='img/%s' % first_spell.image_name,
                                arr_letter=first_spell.array_letters, arr_answer=list(first_spell.answer))
     return render_template('review.html', answers=get_guest(session[GUEST_NAME]).spell_answers)
+
+
+@app.route("/review_test", methods=['GET'])
+def review_test():
+    return render_template('review.html', answers=get_guest(session[GUEST_NAME]).spell_answers)
+
+
+@app.route("/back_to_test", methods=['GET'])
+def back_to_test():
+    first_spell = get_next_spell_entry(session[GUEST_NAME])
+    if first_spell:
+        return render_template('work.html', msg=session[GUEST_NAME], image_file='img/%s' % first_spell.image_name,
+                               arr_letter=first_spell.array_letters, arr_answer=list(first_spell.answer))
+    return review_test()
+
+
+@app.route("/go_to_test", methods=['GET'])
+def go_to_test():
+    image_name = request.args.get('image_name', '')
+    spell_entry = get_spell_entry(image_name)
+    if spell_entry:
+        return render_template('work.html', msg=session[GUEST_NAME], image_file='img/%s' % spell_entry.image_name,
+                               arr_letter=spell_entry.array_letters, arr_answer=list(spell_entry.answer))
+    return "Error retrieving data"
 
 
 
@@ -138,7 +162,7 @@ def add_spell():
         answer = request.form[KEY_ANSWER]
         level = request.form[KEY_LEVEL]
 
-        if create_spell_entry(f.filename, arr_letter.split(','), answer, level):
+        if create_spell_entry(f.filename, list(arr_letter), answer, level):
             return render_template('spell_admin.html', msg='Successfully saved')
     return render_template('spell_admin.html', err='Failed to add entry')
 

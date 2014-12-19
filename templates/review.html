@@ -10,6 +10,7 @@
 
 {% block menu_opt %}
   <li><a href="/retake_test">Retake the test</a></li>
+   <li><a href="/back_to_test">Back to current test</a></li>
 {% endblock %}
 
 {% block content %}
@@ -17,7 +18,7 @@
     {% for image_name, one_answer in answers.items() %}
     <li class="list-group-item" style="width:330px;">
         <span class="badge">{{one_answer}}</span>
-        <img src="{{url_for('static', filename='img/' +image_name + '.jpg')}}">
+        <a href="{{url_for('go_to_test')}}?image_name={{image_name}}" ><img src="{{url_for('static', filename='img/' +image_name + '.jpg')}}"></a>
     </li>
     {% endfor %}
     </ul>

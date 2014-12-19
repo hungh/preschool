@@ -111,6 +111,16 @@ def get_next_spell_entry(guest_name):
     return None
 
 
+def get_spell_entry(image_name):
+
+    for spell_entry in SpellEntry.objects():
+        key_image = get_img_key(spell_entry.image_name)
+        if image_name == key_image:
+            return spell_entry
+
+    return None
+
+
 def add_spell_answer_to_guest(guest_name, image_name, answer):
     guest = get_guest(guest_name)
     key_image = get_img_key(image_name)
